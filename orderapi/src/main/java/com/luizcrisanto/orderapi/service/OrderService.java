@@ -81,4 +81,30 @@ public class OrderService {
             .map(this::toResponseDTO)
             .toList();
     }
+
+    public OrderResponseDTO updateOrder(String orderId, OrderRequestDTO dto) {
+
+    Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado com id: " + orderId));
+
+    order.setValue(dto.getValorTotal());
+    order.setCreationDate(dto.getDataCriacao());
+
+    order.getItems().clear();
+
+    List<Item> items = dto.getItems().stream().map(itemDto -> {
+        Item item = new Item();
+        item.setProductId(Long.parseLong(itemDto.getIdItem()));
+        item.setQuantity(itemDto.getQuantidadeItem());
+        item.setPrice(itemDto.getValorItem());
+        item.setOrder(order);
+        return item;
+    }).toList();
+
+    order.getItems().addAll(items);
+
+    Order updatedOrder = orderRepository.save(order);
+
+    return toResponseDTO(updatedOrder);
+}
 }
