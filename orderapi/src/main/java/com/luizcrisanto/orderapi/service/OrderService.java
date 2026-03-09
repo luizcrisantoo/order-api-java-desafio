@@ -73,5 +73,12 @@ public class OrderService {
             .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado com id: " + orderId));
 
     return toResponseDTO(order);
-}
+    }
+
+    public List<OrderResponseDTO> listOrders() {
+    return orderRepository.findAll()
+            .stream()
+            .map(this::toResponseDTO)
+            .toList();
+    }
 }
