@@ -1,16 +1,15 @@
 # Order API - Desafio Técnico
 
 API REST para gerenciamento de pedidos desenvolvida em **Java com Spring
-Boot** e **PostgreSQL**.
+Boot**, utilizando **PostgreSQL** para persistência de dados e **Swagger
+(OpenAPI)** para documentação.
 
-Este projeto foi desenvolvido como solução para um desafio técnico que
-originalmente solicitava uma API em **Node.js**.\
-A implementação foi realizada em **Java**, mantendo a mesma lógica de
-negócio e requisitos funcionais do desafio.
+O projeto implementa **CRUD completo de pedidos**, com transformação de
+dados conforme solicitado no desafio.
 
 ------------------------------------------------------------------------
 
-# Tecnologias utilizadas
+# Tecnologias
 
 -   Java 17
 -   Spring Boot
@@ -22,123 +21,163 @@ negócio e requisitos funcionais do desafio.
 
 ------------------------------------------------------------------------
 
-# Arquitetura do projeto
+# Arquitetura
 
-O projeto segue uma arquitetura em camadas comum em aplicações backend
-profissionais.
+O projeto segue **arquitetura em camadas**, padrão usado em empresas:
 
-Controller → Service → Repository → Database
-
-## Estrutura de pacotes
-
-controller\
-service\
-repository\
-entity\
-dto\
-mapper\
-exception
-
-### Descrição das camadas
-
-**Controller**\
-Responsável por expor os endpoints da API.
-
-**Service**\
-Contém a lógica de negócio da aplicação.
-
-**Repository**\
-Responsável pela comunicação com o banco de dados utilizando Spring Data
-JPA.
-
-**Entity**\
-Representação das tabelas do banco de dados.
-
-**DTO**\
-Objetos utilizados para transporte de dados entre cliente e API.
-
-**Mapper**\
-Responsável por transformar DTOs em Entities e vice-versa.
+    controller  → endpoints da API
+    service     → regras de negócio
+    repository  → acesso ao banco
+    entity      → entidades JPA
+    dto         → objetos de transferência
+    mapper      → conversão DTO ↔ Entity
+    exception   → tratamento global de erros
+    config      → configurações da aplicação
 
 ------------------------------------------------------------------------
 
-# Banco de dados
+# Estrutura do Projeto
 
-Banco utilizado:
+    src/main/java/com/luizcrisanto/orderapi
 
-PostgreSQL
+    controller/
+        OrderController.java
 
-Nome do banco:
+    service/
+        OrderService.java
 
-orderdb
+    repository/
+        OrderRepository.java
+
+    entity/
+        Order.java
+        Item.java
+
+    dto/
+        OrderRequestDTO.java
+        OrderResponseDTO.java
+        ItemRequestDTO.java
+        ItemResponseDTO.java
+
+    mapper/
+        OrderMapper.java
+
+    exception/
+        GlobalExceptionHandler.java
+        OrderNotFoundException.java
+
+    config/
+        OpenApiConfig.java
 
 ------------------------------------------------------------------------
 
-# Configuração do banco
+# Configuração do Banco de Dados
 
 Arquivo:
 
-src/main/resources/application.properties
+    src/main/resources/application.properties
 
-Exemplo de configuração:
+Exemplo:
 
-spring.datasource.url=jdbc:postgresql://localhost:5432/orderdb
-spring.datasource.username=postgres spring.datasource.password=123456
+    spring.datasource.url=jdbc:postgresql://localhost:5432/orderdb
+    spring.datasource.username=postgres
+    spring.datasource.password=123456
 
-spring.jpa.hibernate.ddl-auto=update spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
+    spring.jpa.hibernate.ddl-auto=update
+    spring.jpa.show-sql=true
 
-------------------------------------------------------------------------
-
-# Executando o projeto
-
-## 1 - Clonar o repositório
-
-git clone https://github.com/luizcrisantoo/order-api-java-desafio
-
-## 2 - Entrar na pasta do projeto
-
-cd orderapi
-
-## 3 - Executar a aplicação
-
-./mvnw spring-boot:run
-
-A aplicação iniciará em:
-
-http://localhost:3000
+    server.port=3000
 
 ------------------------------------------------------------------------
 
-# Estrutura da API
+# Como executar o projeto
+
+### 1. Clonar o repositório
+
+    git clone https://github.com/seu-usuario/order-api-java-desafio.git
+
+### 2. Entrar na pasta
+
+    cd order-api-java-desafio
+
+### 3. Rodar aplicação
+
+Linux / Mac:
+
+    ./mvnw spring-boot:run
+
+Windows:
+
+    mvnw spring-boot:run
+
+Servidor inicia em:
+
+    http://localhost:3000
+
+------------------------------------------------------------------------
+
+# Documentação da API
+
+Swagger disponível em:
+
+    http://localhost:3000/swagger-ui/index.html
+
+Swagger permite testar todos os endpoints diretamente no navegador.
+
+------------------------------------------------------------------------
+
+# Endpoints
 
 ## Criar pedido
 
-POST /order
+    POST /order
 
-### Exemplo de request
+Exemplo request:
 
-```json
+``` json
 {
   "numeroPedido": "v10089015vdb-01",
-  "valorTotal": 10000,
-  "dataCriacao": "2023-07-19T12:24:11",
+  "dataCriacao": "2026-03-09T12:00:00Z",
+  "valorTotal": 100.0,
   "items": [
     {
-      "idItem": "2434",
-      "quantidadeItem": 1,
-      "valorItem": 1000
+      "idItem": "1",
+      "quantidadeItem": 2,
+      "valorItem": 50
     }
   ]
 }
+```
+
 ------------------------------------------------------------------------
 
-# Transformação de dados
+## Buscar pedido
 
-O desafio exige que os dados recebidos sejam transformados antes de
-serem armazenados no banco.
+    GET /order/{orderId}
 
-  Campo recebido   Campo salvo
+------------------------------------------------------------------------
+
+## Listar pedidos
+
+    GET /order/list
+
+------------------------------------------------------------------------
+
+## Atualizar pedido
+
+    PUT /order/{orderId}
+
+------------------------------------------------------------------------
+
+## Deletar pedido
+
+    DELETE /order/{orderId}
+
+------------------------------------------------------------------------
+
+# Regras de Transformação
+
+  Entrada          Saída
   ---------------- --------------
   numeroPedido     orderId
   valorTotal       value
@@ -147,45 +186,80 @@ serem armazenados no banco.
   quantidadeItem   quantity
   valorItem        price
 
-------------------------------------------------------------------------
+Exemplo:
 
-# Endpoints da API
+Entrada:
 
-  Método   Endpoint      Descrição
-  -------- ------------- -------------------------
-  POST     /order        Criar novo pedido
-  GET      /order/{id}   Buscar pedido por id
-  GET      /order/list   Listar todos os pedidos
-  PUT      /order/{id}   Atualizar pedido
-  DELETE   /order/{id}   Remover pedido
+    numeroPedido: v10089015vdb-01
+
+Resultado salvo:
+
+    orderId: v10089015vdb
 
 ------------------------------------------------------------------------
 
-# Documentação da API
+# Tratamento Global de Erros
 
-A API possui documentação interativa utilizando **Swagger (OpenAPI)**.
+A API utiliza:
 
-Após iniciar o projeto, acesse:
+    @RestControllerAdvice
 
-http://localhost:3000/swagger-ui.html
+Exemplo resposta de erro:
+
+``` json
+{
+ "timestamp": "2026-03-09T12:45:01",
+ "status": 404,
+ "error": "Not Found",
+ "message": "Pedido não encontrado com id: v10089015vdb",
+ "path": "/order/v10089015vdb"
+}
+```
 
 ------------------------------------------------------------------------
 
-# Melhorias implementadas
+# Ajustes Profissionais (nível empresa)
 
--   Arquitetura em camadas
--   DTO para separação entre API e banco
--   Transformação de dados entre request e entidade
--   Integração com PostgreSQL
--   Documentação automática da API com Swagger
--   Estrutura de commits organizada
+Duas melhorias simples que deixam o projeto mais profissional.
+
+## 1. Validação de DTO
+
+Adicionar validações:
+
+    @NotBlank
+    @NotNull
+    @NotEmpty
+    @Valid
+
+Exemplo:
+
+``` java
+@NotBlank(message = "numeroPedido é obrigatório")
+private String numeroPedido;
+```
+
+------------------------------------------------------------------------
+
+## 2. Padronização de erros da API
+
+Estrutura de resposta de erro:
+
+    timestamp
+    status
+    error
+    message
+    path
+
+Implementado via `GlobalExceptionHandler`.
 
 ------------------------------------------------------------------------
 
 # Autor
 
 Luiz Crisanto\
-Desenvolvedor Backend Java
+Desenvolvedor Backend Java\
+Recife - PE
 
-LinkedIn\
-https://www.linkedin.com/in/luizcrisanto/
+GitHub: https://github.com/luizcrisantoo
+
+LinkedIn: https://www.linkedin.com/in/luizcrisanto/
