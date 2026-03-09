@@ -106,5 +106,12 @@ public class OrderService {
     Order updatedOrder = orderRepository.save(order);
 
     return toResponseDTO(updatedOrder);
-}
+    }
+
+    public void deleteOrder(String orderId) {
+    Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado com id: " + orderId));
+
+    orderRepository.delete(order);
+    }
 }
