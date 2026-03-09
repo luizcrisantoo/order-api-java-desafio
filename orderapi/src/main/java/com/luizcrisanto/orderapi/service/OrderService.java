@@ -7,9 +7,10 @@ import com.luizcrisanto.orderapi.dto.OrderResponseDTO;
 import com.luizcrisanto.orderapi.entity.Item;
 import com.luizcrisanto.orderapi.entity.Order;
 import com.luizcrisanto.orderapi.repository.OrderRepository;
+import com.luizcrisanto.orderapi.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
+
 
 @Service
 public class OrderService {
@@ -66,4 +67,11 @@ public class OrderService {
                 items
         );
     }
+
+    public OrderResponseDTO getOrderById(String orderId) {
+    Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado com id: " + orderId));
+
+    return toResponseDTO(order);
+}
 }
